@@ -6,6 +6,8 @@ nbgv="$current_dir/nbgv.sh"
 export GIT_CEILING_DIRECTORIES="$current_dir"
 export GIT_AUTHOR_NAME="test-user"
 export GIT_AUTHOR_EMAIL="test-user@example.com"
+export GIT_COMMITTER_NAME="test-user"
+export GIT_COMMITTER_EMAIL="test-user@example.com"
 
 failures=0
 
