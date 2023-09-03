@@ -107,7 +107,7 @@ get_root_directory() {
 
 # First, we move to the root of the git directory, where version.txt should live.
 root_of_repo="$(get_root_directory)"
-[[ "$root_of_repo" ]] || exit 1
+[ "$root_of_repo" ] || exit 1
 cd "$root_of_repo" || error "Error changing directory to '$root_of_repo'."
 
 
@@ -157,8 +157,8 @@ info "Patch: $patch"
 # Determine whether we're on a pre-release branch and add a suffix if so.
 current_branch="$(get_current_branch)"
 main_branch="$(find_main_branch)"
-[[ "$current_branch" ]] || exit 1
-[[ "$main_branch" ]] || exit 1
+[ "$current_branch" ] || exit 1
+[ "$main_branch" ] || exit 1
 
 if [ "$main_branch" != "$current_branch" ]; then
     suffix="-dev"
