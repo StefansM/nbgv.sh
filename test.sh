@@ -17,7 +17,7 @@ fail() {
 
 
 run-test() {
-    test_name="$1"
+    local test_name="$1"
     shift
 
     echo -n "$test_name $@ ..."
@@ -181,8 +181,7 @@ test-arbitrary-default-branches-supported() {
     git commit -q -m 'Commit 1'
 
 
-    export MAIN_BRANCH=some-branch
-    if ! version="$("$nbgv")" 2>/dev/null; then
+    if ! version="$(MAIN_BRANCH=some-branch "$nbgv")" 2>/dev/null; then
         fail "nbgv should succeed when version.txt is committed."
         return 1
     fi
@@ -241,6 +240,38 @@ test-do-not-support-multiple-roots() {
     fi
 }
 
+test-version-file-in-subdir-is-used() {
+    make-test-dir "${FUNCNAME[0]}"
+
+    git init -q -b master
+
+    mkdir -p a b
+    echo "0.1.0" > version.txt
+    echo "0.2.0" > a/version.txt
+
+    git add .
+    git commit -q -m "Add versions"
+
+    # These should both return the root version.txt.
+    # This is called from the root:
+    root1="$(MONOREPO=1 "$nbgv" "$monorepo_flag")"
+    # This is called from a subdir but doesn't include the MONOREPO var.
+    root2="$(cd a && "$nbgv")"
+
+    for result in "$root1" "$root2"; do
+        if [[ "$result" != "0.1.0" ]]; then
+            fail "should return the root version.txt when called from root."
+            return 1
+        fi
+    done
+
+    result="$(cd a && MONOREPO=1 "$nbgv" a 2>/dev/null)"
+    if [[ "$result" != "0.2.0" ]]; then
+        fail "should return subdir version.txt when called from subdir."
+        return 1
+    fi
+}
+
 
 run-test test-no-git-repo
 run-test test-no-version-txt
@@ -250,6 +281,7 @@ run-test test-patch-version-is-incremented-per-commit
 run-test test-suffix-is-added-on-non-default-branches
 run-test test-arbitrary-default-branches-supported
 run-test test-do-not-support-multiple-roots
+run-test test-version-file-in-subdir-is-used
 
 invalid_inputs=("" "0.1" "foo.1.2")
 for invalid_input in "${invalid_inputs[@]}"; do

@@ -2,6 +2,7 @@
 
 candidate_default_branches="main master"
 verbose="$V"
+monorepo="$MONOREPO"
 
 # Print usage message and exit with the given status code.
 usage() {
@@ -28,7 +29,12 @@ CONFIGURATION
   $candidate_default_branches, you can set the default branch with the
   environment variable MAIN_BRANCH:
 
-      $ MAIN_BRANCH=my-odly-named-main-branch nbgv.sh
+      $ MAIN_BRANCH=my-oddly-named-main-branch nbgv.sh
+
+  If your repository is a monorepo, set the environment variable
+  'MONOREPO'. In this mode, nbgv.sh will search upwards from the current
+  directory, up to the root of the repository, and use the first
+  'version.txt' file that it finds.
 EOF
 }
 
@@ -101,14 +107,30 @@ get_root_directory() {
     if ! root_of_repo="$(git rev-parse --show-toplevel 2>/dev/null)"; then
         error "Couldn't find root of directory. Is this a git repository?"
     fi
-    echo "$root_of_repo"
+    echo "$(realpath "$root_of_repo")"
 }
 
 
 # First, we move to the root of the git directory, where version.txt should live.
+# If we're not running in monorepo mode, we can jump straight to the root.
+# Otherwise, we need to traverse upwards until we find version.txt
 root_of_repo="$(get_root_directory)"
 [ "$root_of_repo" ] || exit 1
-cd "$root_of_repo" || error "Error changing directory to '$root_of_repo'."
+
+if [ -z "$monorepo" ]; then
+    cd "$root_of_repo" || error "Error changing directory to '$root_of_repo'."
+else
+    while true; do
+        cwd="$(realpath "$(pwd)")"
+        if [ "$cwd" == "$root_of_repo" ]; then
+            break
+        fi
+        if [ -e version.txt ]; then
+            break
+        fi
+        cd .. || error "Error moving up a directory from $(pwd)."
+    done
+fi
 
 
 # Read the contents of version.txt

@@ -1,5 +1,4 @@
 name: test
-run-name: Test pull request from ${{ github.actor }}
 on:
   push:
     branches-ignore: [main]
