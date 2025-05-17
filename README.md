@@ -54,6 +54,29 @@ $ nbgv.sh
 0.2.1-dev
 ```
 
+## Monorepos
+
+If your repository is a monorepo, set the environment variable `MONOREPO`. In
+this mode, nbgv.sh will search upwards from the current directory, up to the
+root of the repository, and use the first 'version.txt' file that it finds.
+
+For example:
+
+```console
+$ mkdir project1 project2
+$ echo 1.0.0 > project1/version.txt
+$ echo 0.1.0 > project2/version.txt
+$ git add project1 project2
+$ git commit -m 'Initial commit'
+$ cd project1
+$ MONOREPO=1 nbgv.sh
+0.1.0
+$ cd ../project2
+$ MONOREPO=1 nbgv.sh
+1.0.0
+```
+
+
 ## Installation
 
 To install nbgv.sh, download the script and add it to your `$PATH`:
