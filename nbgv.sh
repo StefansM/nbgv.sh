@@ -13,7 +13,7 @@ OVERVIEW
 
   Call nbgv.sh from within a git repository. The repository must contain
   a file named 'version.txt' in the repository root, which must contain a
-  version number in the form MINOR.MAJOR.PATCH.
+  version number in the form MAJOR.MINOR.PATCH.
 
   Nbgv.sh will bump the patch number by one for every commit since
   version.txt was last modified.
